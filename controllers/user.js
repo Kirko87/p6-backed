@@ -22,7 +22,7 @@ exports.signup = async (req, res, next) => {
       res.status(400).json({error}) 
     }
   }
-//login per accedere come utilizzatore esistente
+//login per accedere come utilizzatore
 exports.login = (req, res, next) => {
   User.findOne({email: req.body.email})
     .then(user => {
@@ -39,11 +39,11 @@ exports.login = (req, res, next) => {
                 token: jwt.sign(
                     { userId: user._id},
                     process.env.RANDOM_SECRET_KEY,
-                    { expiresIn: '24h'}
+                    { expiresIn: '24h' }
                 )
              });
          })
-         .catch(error => res.status(500).json({ error }));
+         .catch(error => res.status(500).json({ error }))
     })
     .catch(error => res.status(500).json({ error }))
 };
