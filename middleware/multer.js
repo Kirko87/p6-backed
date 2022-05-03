@@ -1,3 +1,4 @@
+//-----implementazione DOWLOAD delle immagini
 const multer = require('multer');
 
 
@@ -7,12 +8,13 @@ const MIME_TYPES = {
   'image/png': 'png'
 };
 
+//configurazione multer
 const storage = multer.diskStorage({
-  // Destination
+  // Destinazione
   destination: (req, file, callback) => {
     callback(null, 'images');
   },
-  // Nom de fichier
+  // Nome del file
   filename: (req, file, callback) => {
     const name = file.originalname.split(' ').join('_');
     const extension = MIME_TYPES[file.mimetype];
@@ -20,5 +22,5 @@ const storage = multer.diskStorage({
   }
 });
 
-// Fichier img unique
+// File img unico
 module.exports = multer({storage: storage}).single('image');
