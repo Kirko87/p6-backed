@@ -1,7 +1,7 @@
 // importazione di bcrypt per l'hash della password
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+
 
 //importazione del modello
 const User = require('../models/User');
@@ -23,27 +23,25 @@ exports.signup = async (req, res, next) => {
     }
   }
 //login per accedere come utilizzatore
-exports.login = (req, res, next) => {
-  User.findOne({email: req.body.email})
-    .then(user => {
-       if (!user) {
-           return res.status(401).json({ error: 'Utilisateur non trouvé !'});
-       }
-       bcrypt.compare(req.body.password, user.password)
-         .then(valid => {
-             if (!valid) {
-                return res.status(401).json({ error: 'Mot de passe incorrect !'});
-             }
-             res.status(200).json({
-                userId: user._id,
-                token: jwt.sign(
-                    { userId: user._id},
-                    process.env.RANDOM_SECRET_KEY,
-                    { expiresIn: '24h' }
-                )
-             });
-         })
-         .catch(error => res.status(500).json({ error }))
+exports.login = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email })
+    if (!user) return res.status(404).json({ error: 'Utilisateur non trouvé !' })
+
+    const valid = await bcrypt.compare(req.body.password, user.password)
+    if (!valid) return res.status(401).json({ error: 'Mot de passe incorrect !' });
+
+    res.status(200).json({
+      userId: user._id,
+      token: jwt.sign(
+        { userId: user._id },
+        process.env.RANDOM_SECRET_KEY,
+        { expiresIn: '24h' }
+      )
     })
-    .catch(error => res.status(500).json({ error }))
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error })
+  }
 };
